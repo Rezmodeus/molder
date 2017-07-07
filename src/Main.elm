@@ -13,21 +13,16 @@ type alias DialogMessage =
     }
 
 
-type alias Dialog =
+type alias Quest =
     { prolog : List DialogMessage
     , active : List DialogMessage
     , success : List DialogMessage
     , failure : List DialogMessage
+    , rewardAction : RewardAction
     }
 
 
-type alias Quest =
-    { dialog : Dialog
-    , reward : Reward
-    }
-
-
-type alias Reward =
+type alias RewardAction =
     { events : List Event }
 
 
