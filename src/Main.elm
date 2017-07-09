@@ -2,13 +2,107 @@ module Main exposing (..)
 
 import Html exposing (Html, text, div, img)
 import Html.Attributes exposing (src)
+import Dict exposing (..)
 
 
 -- Quest dialog
 
 
+type alias TextData =
+    { speaker : String
+    , text : String
+    }
+
+
+type alias SingleChoice =
+    { text : String
+    , nextId : String
+    }
+
+
+type alias ChoiceData =
+    { speaker : String
+    , choices : List SingleChoice
+    }
+
+
+type DialogType
+    = Text TextData
+    | Choice ChoiceData
+
+
+dialogDb : Dict.Dict String DialogType
+dialogDb =
+    let
+        someChoices =
+            [ SingleChoice "ok" "key2"
+            , SingleChoice "no" "key0"
+            ]
+    in
+        Dict.fromList
+            [ ( "key0", Text (TextData "QuestGiver" "I said this") )
+            , ( "key1", Choice (ChoiceData "QuestReceiver" someChoices) )
+            ]
+
+
+test : Maybe DialogType
+test =
+    Debug.log "yea" (Dict.get "key0" dialogDb)
+
+
+questDialog : List String
+questDialog =
+    [ "Q:Help"
+    , "P:yes"
+    , "-Q: cool thanks, go find it"
+    , "P:no"
+    , "-Q: another time then"
+    ]
+
+
+
+-- not working. Dialog needs to be conditional for accepting och declining Quest
+-- also response from questGiver when accepted
+
+
+fetchQuest : Quest
+fetchQuest =
+    let
+        prologText =
+            "Can you get me [*item*]. I will give you a [*reward*] if you do."
+
+        prolog =
+            DialogMessage "QuestGiver" prologText
+
+        activeText =
+            "Have you found [*item*]"
+
+        active =
+            DialogMessage "QuestGiver" activeText
+
+        successText =
+            "Thank you. Here is a [*reward*] for you troubles."
+
+        success =
+            DialogMessage "QuestGiver" successText
+
+        failureText =
+            "Thanks for nothing."
+
+        failure =
+            DialogMessage "QuestGiver" failureText
+
+        event =
+            Event "QuestGiver" "QuestReceiver" "[*reward*]" "giveAction"
+
+        rewardActions =
+            [ event ]
+    in
+        Quest [ prolog ] [ active ] [ success ] [ failure ] rewardActions
+
+
 type alias DialogMessage =
-    { speakerId : String
+    { speaker : String
     , text : String
     }
 
@@ -18,12 +112,8 @@ type alias Quest =
     , active : List DialogMessage
     , success : List DialogMessage
     , failure : List DialogMessage
-    , rewardAction : RewardAction
+    , rewardActions : List Event
     }
-
-
-type alias RewardAction =
-    { events : List Event }
 
 
 
