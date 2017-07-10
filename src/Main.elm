@@ -11,6 +11,7 @@ import Dict exposing (..)
 type alias TextData =
     { speaker : String
     , text : String
+    , nextId : String
     }
 
 
@@ -22,103 +23,36 @@ type alias SingleChoice =
 
 type alias ChoiceData =
     { speaker : String
+    , text : String
     , choices : List SingleChoice
     }
 
 
-type DialogType
+type Dialog
     = Text TextData
     | Choice ChoiceData
+    | Action (List Event)
 
 
-dialogDb : Dict.Dict String DialogType
-dialogDb =
-    let
-        someChoices =
-            [ SingleChoice "ok" "key2"
-            , SingleChoice "no" "key0"
-            ]
-    in
-        Dict.fromList
-            [ ( "key0", Text (TextData "QuestGiver" "I said this") )
-            , ( "key1", Choice (ChoiceData "QuestReceiver" someChoices) )
-            ]
+type alias Conversation =
+    List ( String, Dialog )
 
 
-test : Maybe DialogType
-test =
-    Debug.log "yea" (Dict.get "key0" dialogDb)
-
-
-questDialog : List String
-questDialog =
-    [ "Q:Help"
-    , "P:yes"
-    , "-Q: cool thanks, go find it"
-    , "P:no"
-    , "-Q: another time then"
+fetchQuestConversationProlog : Conversation
+fetchQuestConversationProlog =
+    [ ( "key0"
+      , Choice
+            (ChoiceData "QuestReceiver"
+                "Can you help me find XX"
+                [ SingleChoice "yes" "key1"
+                , SingleChoice "no" "key2"
+                ]
+            )
+      )
+    , ( "key0", Text (TextData "QuestGiver" "Great" "key3") )
+    , ( "key2", Text (TextData "QuestGiver" "ok later then" "key0") )
+    , ( "key3", Action ([]) )
     ]
-
-
-
--- not working. Dialog needs to be conditional for accepting och declining Quest
--- also response from questGiver when accepted
-
-
-fetchQuest : Quest
-fetchQuest =
-    let
-        prologText =
-            "Can you get me [*item*]. I will give you a [*reward*] if you do."
-
-        prolog =
-            DialogMessage "QuestGiver" prologText
-
-        activeText =
-            "Have you found [*item*]"
-
-        active =
-            DialogMessage "QuestGiver" activeText
-
-        successText =
-            "Thank you. Here is a [*reward*] for you troubles."
-
-        success =
-            DialogMessage "QuestGiver" successText
-
-        failureText =
-            "Thanks for nothing."
-
-        failure =
-            DialogMessage "QuestGiver" failureText
-
-        event =
-            Event "QuestGiver" "QuestReceiver" "[*reward*]" "giveAction"
-
-        rewardActions =
-            [ event ]
-    in
-        Quest [ prolog ] [ active ] [ success ] [ failure ] rewardActions
-
-
-type alias DialogMessage =
-    { speaker : String
-    , text : String
-    }
-
-
-type alias Quest =
-    { prolog : List DialogMessage
-    , active : List DialogMessage
-    , success : List DialogMessage
-    , failure : List DialogMessage
-    , rewardActions : List Event
-    }
-
-
-
--- QuestGiver : does something : with/using : to someone
--- QuestGiver_gives_reward_player
 
 
 type alias Event =
@@ -127,6 +61,31 @@ type alias Event =
     , what : String
     , action : String
     }
+
+
+dialogDb : Dict.Dict String Dialog
+dialogDb =
+    Dict.fromList
+        fetchQuestConversationProlog
+
+
+test : Maybe Dialog
+test =
+    Debug.log "yea" (Dict.get "key0" dialogDb)
+
+
+type alias Quest =
+    { prolog : Conversation
+    , active : Conversation
+    , success : Conversation
+    , failure : Conversation
+    , rewardActions : List Event
+    }
+
+
+
+-- QuestGiver : does something : with/using : to someone
+-- QuestGiver_gives_reward_player
 
 
 type alias Npc =
