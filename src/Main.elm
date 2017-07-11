@@ -55,12 +55,34 @@ fetchQuestConversationProlog =
     ]
 
 
+
+-- subjects can be items, players, npc, quests etc, any thing
+-- animal : start_attack : player
+-- player : TriggerEvent : event
+-- works both directions
+-- player : receive : reward
+-- sometimes parameters are omitted or not used
+-- current_quest : step_quest : current_quest
+
+
 type alias Event =
-    { from : String
-    , to : String
-    , what : String
-    , action : String
+    { subject1 : String
+    , verb : VerbType
+    , subject2 : String
     }
+
+
+
+-- VerbTypes need proper and valid subjects
+-- StepQuest can't be run on anything that is not a quest
+
+
+type VerbType
+    = StartAttack
+    | Attack
+    | Receive
+    | StepQuest
+    | TriggerEvent
 
 
 dialogDb : Dict.Dict String Dialog
@@ -79,7 +101,7 @@ type alias Quest =
     , active : Conversation
     , success : Conversation
     , failure : Conversation
-    , rewardActions : List Event
+    , rewardActions : List Int
     }
 
 
