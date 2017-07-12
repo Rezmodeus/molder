@@ -1,8 +1,11 @@
 module Main exposing (..)
 
 import Html exposing (Html, text, div, img)
-import Html.Attributes exposing (src)
+import Html.Attributes exposing (src, href, style, class)
 import Dict exposing (..)
+import Material
+import Material.Scheme
+import Material.Button as Button
 
 
 -- Quest dialog
@@ -135,12 +138,27 @@ type alias Item =
 
 
 type alias Model =
-    {}
+    { mdl :
+        Material.Model
+        -- Boilerplate: model store for any and all Mdl components you use.
+    }
+
+
+model : Model
+model =
+    { mdl =
+        Material.model
+        -- Boilerplate: Always use this initial Mdl model store.
+    }
+
+
+type alias Mdl =
+    Material.Model
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( {}, Cmd.none )
+    ( model, Cmd.none )
 
 
 
@@ -148,24 +166,38 @@ init =
 
 
 type Msg
-    = NoOp
+    = Mdl (Material.Msg Msg)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        Mdl msg_ ->
+            Material.update Mdl msg_ model
 
 
 
+--    ( model, Cmd.none )
 ---- VIEW ----
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ img [ src "/logo.svg" ] []
+        [ img [ src "/logo.svg" ]
+            []
+        , Button.render Mdl
+            [ 9, 0, 0, 1 ]
+            model.mdl
+            [ Button.ripple
+            , Button.colored
+            , Button.raised
+              --, Button.link "#grid"
+            ]
+            [ text "Link" ]
         , div [] [ text "Your Elm App is working!" ]
         ]
+        |> Material.Scheme.top
 
 
 
