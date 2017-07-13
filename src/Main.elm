@@ -11,50 +11,51 @@ import Material.Button as Button
 -- Quest dialog
 
 
-type alias TextData =
-    { speaker : String
-    , text : String
-    , nextId : String
-    }
-
-
-type alias SingleChoice =
+type alias Choice =
     { text : String
     , nextId : String
     }
 
 
-type alias ChoiceData =
+type alias SpeechData =
     { speaker : String
     , text : String
-    , choices : List SingleChoice
+    , choices : List Choice
     }
 
 
 type Dialog
-    = Text TextData
-    | Choice ChoiceData
-    | Action (List Event)
+    = Speech SpeechData
+    | DoEvents (List Event)
 
 
 type alias Conversation =
     List ( String, Dialog )
 
 
+
+-- standard move to next speech
+
+
+nextSpeech : String -> List Choice
+nextSpeech key =
+    [ Choice "ok" key ]
+
+
 fetchQuestConversationProlog : Conversation
 fetchQuestConversationProlog =
     [ ( "key0"
-      , Choice
-            (ChoiceData "QuestReceiver"
+      , Speech
+            (SpeechData "QuestReceiver"
                 "Can you help me find XX"
-                [ SingleChoice "yes" "key1"
-                , SingleChoice "no" "key2"
+                [ Choice "yes" "key1"
+                , Choice "no" "key2"
                 ]
             )
       )
-    , ( "key0", Text (TextData "QuestGiver" "Great" "key3") )
-    , ( "key2", Text (TextData "QuestGiver" "ok later then" "key0") )
-    , ( "key3", Action ([]) )
+    , ( "key0", Speech (SpeechData "QuestGiver" "Great" (nextSpeech "key3")) )
+    , ( "key0", Speech (SpeechData "QuestGiver" "ok later then" (nextSpeech "key0")) )
+    , ( "key3", DoEvents ([]) )
     ]
 
 
